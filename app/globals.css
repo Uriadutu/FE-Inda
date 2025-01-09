@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.page {
+  @apply pb-16 pt-24 md:pb-20 md:pt-28 lg:pb-24 lg:pt-32 mx-32;
+}
+
+.btn-back {
+  @apply bg-gray-300 border inline-block border-gray-400 text-gray-600 my-3 px-3 py-2 rounded;
+}
+.btn-add {
+  @apply bg-blue-600 border inline-block border-white text-white my-3 px-3 py-2 rounded;
+}
+
+.btn-pdf {
+  @apply bg-red-500 border inline-block border-red-600 text-white my-3 px-3 py-2 rounded;
+}
+.btn-excel {
+  @apply bg-green-500 border inline-block border-green-600 text-white my-3 px-3 py-2 rounded;
+}
+
+.input {
+  @apply p-2 border border-gray-200 rounded-md text-sm;
+}
+
+.label-input {
+  @apply text-black mb-2 mt-1 font-semibold;
+}
+.z-top {
+  @apply z-[10000]
+}
+
+.btn-simpan {
+  @apply px-3 py-2 mb-0 bg-blue-500 text-white font-semibold text-sm rounded-md hover:bg-blue-600 transition duration-300;
+}
+
+.btn-batal {
+  @apply px-3 py-2 mb-0 bg-white border border-gray-300 text-black text-sm rounded-md hover:bg-gray-100 transition duration-300;
+}
+
+.btn-tambah {
+    @apply bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 duration-300
+}
+.btn-edit {
+    @apply bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 duration-300
+}
+
+.btn-hapus {
+    @apply bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 duration-300
+}
+
+.preview-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.preview-item {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: 4px;
+}
+
+@media print {
+  body {
+    -webkit-print-color-adjust: exact; /* Mengatur warna */
+    print-color-adjust: exact;
+  }
+
+  .preview-container {
+    page-break-inside: avoid; /* Hindari pemutusan elemen */
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    border: 1px solid black;
+    padding: 4px;
+    text-align: center;
+  }
+}
