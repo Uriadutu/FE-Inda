@@ -27,7 +27,7 @@ const AddArsipModal = ({ setIsOpenModalAdd, getArsip }) => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("Berhasil menyimpan data");
+      alert("Berhasil menyimpan data, Data Pending");
       setIsOpenModalAdd(false);
       getArsip();
     } catch (error) {

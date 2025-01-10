@@ -41,7 +41,7 @@ const Navbar = async () => {
                       Laporan
                     </Link>
                   </li>
-                  {session.user.role === "geologi senior" ? (
+                  
                     <li>
                       <Link
                         href="/arsip-laporan"
@@ -50,7 +50,6 @@ const Navbar = async () => {
                         Arsip Laporan
                       </Link>
                     </li>
-                  ) : null}
                   {session.user.role === "geologi senior" ? (
                     <li>
                       <Link
@@ -58,6 +57,16 @@ const Navbar = async () => {
                         className="hover:text-gray-600 duration-300"
                       >
                         Validasi Laporan
+                      </Link>
+                    </li>
+                  ) : null}
+                  {session.user.role === "geologi senior" ? (
+                    <li>
+                      <Link
+                        href="/validasi-arsip-laporan"
+                        className="hover:text-gray-600 duration-300"
+                      >
+                        Validasi Arsip Laporan
                       </Link>
                     </li>
                   ) : null}

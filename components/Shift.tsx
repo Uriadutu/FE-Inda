@@ -1,21 +1,19 @@
-
 import Link from "next/link";
 import React, { useState } from "react";
 
-const Shift = () => {
-
+const Shift = ({ session }) => {
   const shift = [
     {
       shift: "Pagi",
-      href : "/shift/pagi"
+      href: "/shift/pagi",
     },
     {
-        shift: "Siang",
-        href : "/shift/siang"
+      shift: "Siang",
+      href: "/shift/siang",
     },
     {
-        shift: "Malam",
-        href : "/shift/malam"
+      shift: "Malam",
+      href: "/shift/malam",
     },
   ];
 
@@ -34,9 +32,22 @@ const Shift = () => {
             <tr className="border text-left text-gray-700">
               <td className="border px-4 py-3">{item.shift}</td>
               <td className="border px-4 py-3">
-                <Link href={item.href} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 duration-300">
-                  Tambah
-                </Link>
+                {session.user.role === "geologi junior" && (
+                  <Link
+                    href={item.href}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 duration-300"
+                  >
+                    Tambah
+                  </Link>
+                )}
+                {session.user.role !== "geologi junior" && (
+                  <Link
+                    href={item.href}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 duration-300"
+                  >
+                    Lihat
+                  </Link>
+                )}
               </td>
             </tr>
           ))}
