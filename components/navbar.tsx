@@ -70,6 +70,16 @@ const Navbar = async () => {
                       </Link>
                     </li>
                   ) : null}
+                  {session.user.role === "admin" ? (
+                    <li>
+                      <Link
+                        href="/data-pengguna"
+                        className="hover:text-gray-600 duration-300"
+                      >
+                        Data Pengguna
+                      </Link>
+                    </li>
+                  ) : null}
                 </ul>
               </>
             )}

@@ -14,6 +14,7 @@
     "@prisma/client": "^5.22.0",
     "axios": "^1.7.7",
     "bcrypt-ts": "^5.0.2",
+    "bcryptjs": "^3.0.2",
     "framer-motion": "^11.8.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.2",

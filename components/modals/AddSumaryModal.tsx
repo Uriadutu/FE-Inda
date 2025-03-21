@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Config from "@/lib/config";
+import { useParams } from "next/navigation";
 
 const AddSumaryModal = ({ setIsOpenModalAdd, getSumary }) => {
   const [holeID, setHoleID] = useState("");
@@ -31,12 +32,17 @@ const AddSumaryModal = ({ setIsOpenModalAdd, getSumary }) => {
   const [rl, setRl] = useState("");
   const [northingHoleID, setNorthingHoleID] = useState("");
   const [eastingHoleID, setEastingHoleID] = useState("");
+  const {tgl} = useParams();
+
+  console.log(tgl, "baru");
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await axios.post(`${Config.ipPUBLIC}/sumary`, {
         holeID,
+        by_tgl : tgl,
         proposedID,
         depth,
         from,

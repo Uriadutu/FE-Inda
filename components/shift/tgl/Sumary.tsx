@@ -5,17 +5,19 @@ import { useRouter } from "next/navigation";
 import Config from "@/lib/config";
 import axios from "axios";
 import AddSumaryModal from "@/components/modals/AddSumaryModal";
+import { useParams } from "next/navigation";
 
 const Sumary = ({ session }) => {
   const [openModalSumary, setOpenModalSumary] = useState(false);
   const router = useRouter();
-
+  const { tgl } = useParams();
   const [laporanData, setLaporanData] = useState([]);
+  
 
   // Fungsi untuk mengambil data dari API
   const getDataSumary = async () => {
     try {
-      const response = await axios.get(`${Config.ipPUBLIC}/sumary`);
+      const response = await axios.get(`${Config.ipPUBLIC}/sumary/tgl/${tgl}`);
       setLaporanData(response.data); // simpan data di state
     } catch (error) {
       console.error("Error fetching sumary data:", error);
