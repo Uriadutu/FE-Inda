@@ -5,7 +5,7 @@ interface ExcelProps {
   onExport: (data: any[]) => void;
   dataGet: any[]; // dataGet yang diterima sebagai prop
 }
-
+ 
 const Excel = ({ onExport, dataGet }: ExcelProps) => {
   // Memetakan data yang ingin diekspor (mengambil hanya 'id' atau data lainnya)
   const data = dataGet.map((item) => ({
