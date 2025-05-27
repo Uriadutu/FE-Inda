@@ -13,10 +13,12 @@ import { tanggalFormat } from "@/utils/helper";
 import AddLaporanModal from "@/components/modals/AddLaporanModal";
 import AddSampleModal from "@/components/modals/AddSampleModal";
 import { it } from "node:test";
+import { stat } from "fs";
+import EditSampleModal from "./modals/EditSampleModal";
 
 const Samples = ({ auth }) => {
   const router = useRouter();
-  const { id } = useParams();
+  const { id, namalubang } = useParams();
   const [laporanData, setLaporanData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -24,12 +26,22 @@ const Samples = ({ auth }) => {
   const [openModalRange, setOpenModalRange] = useState(false);
   const [openModalInfo, setOpenModalInfo] = useState(false);
   const [samples, setSamples] = useState([]);
-  const [sampleIDFrom, setSampleIDFrom] = useState("");
-  const [sampleIDTo, setSampleIDTo] = useState("");
-  const [fromFrom, setFromFrom] = useState("");
-  const [fromTo, setFromTo] = useState("");
-  const [toFrom, setToFrom] = useState("");
-  const [toTo, setToTo] = useState("");
+  const [sampleIDFrom, setSampleIDFrom] = useState(0);
+  const [sampleIDTo, setSampleIDTo] = useState(0);
+  const [statusL, setStatusL] = useState("pending");
+  const [openModalEdit, setOpenModalEdit] = useState(false);
+  const [idEdit, setIdEdit] = useState("");
+  const [modalKomentar, setModalKomentar] = useState(false);
+  const [komentar, setKomentar] = useState("");
+
+  const nama = auth.user.name;
+
+  // Menghitung nilai berdasarkan sampleIDFrom dan sampleIDTo
+  const fromFrom = 0;
+  const fromTo = sampleIDTo - sampleIDFrom;
+
+  const toFrom = 1;
+  const toTo = sampleIDTo - sampleIDFrom + 1;
 
   const pdfRef = useRef(null); // Ref untuk elemen yang ingin diexport sebagai PDF
 
@@ -37,7 +49,7 @@ const Samples = ({ auth }) => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${Config.ipPUBLIC}/sumary/${idLaporan}`
+        `${Config.ipPUBLIC}/samples/status/laporan/${statusL}/${idLaporan}/${namalubang}`
       );
       setLaporanData(response.data);
     } catch (error) {
@@ -46,11 +58,12 @@ const Samples = ({ auth }) => {
       setLoading(false);
     }
   };
-  const getSamples = async (idHole) => {
+
+  const getSamples = async (idHole, lubang, statusLaporan) => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${Config.ipPUBLIC}/samples/status/terima/${idHole}`
+        `${Config.ipPUBLIC}/samples/status/laporan/${statusLaporan}/${idHole}/${lubang}`
       );
       setSamples(response.data);
     } catch (error) {
@@ -88,9 +101,9 @@ const Samples = ({ auth }) => {
   useEffect(() => {
     if (id) {
       fetchLaporanData(id);
-      getSamples(id);
+      getSamples(id, namalubang, statusL);
     }
-  }, [id]);
+  }, [id, namalubang, statusL]);
 
   const getSampleCondition = (item) => {
     const conditions = [];
@@ -107,18 +120,29 @@ const Samples = ({ auth }) => {
   const exportToExcel = () => {
     // Buat array dari data tabel
     const data = samples.map((item) => ({
-      "Hole ID": id,
-      "Sample ID": item.sampleID,
-      From: item.from,
-      To: item.to,
-      WheightCaligo: item.actualKg,
-      "Sample Condition": getSampleCondition(item), // Panggil fungsi di sini
-      Colour1: item.colour1,
-      Colour2: item.colour2,
-      Colour3: item.colour3,
-      Litho1: item.primary,
-      Litho2: item.secondary,
-      AltTy: item.alterationType,
+      HoleID: item?.sumary?.holeID,
+      from: item.from,
+      to: item.to,
+      colour1: item.colour1,
+      colour2: item.colour2,
+      colour3: item.colour3,
+      primary: item.primary,
+      secondary: item.secondary,
+      alterationType: item.alterationType,
+      alterationIntensity: item.alterationIntensity,
+      quartzType: item.quartzType,
+      intensity: item.intensity,
+      dry: item.dry,
+      moist: item.moist,
+      wet: item.wet,
+      actualKg: item.actualKg,
+      planKg: item.planKg,
+      sulphideType: item.sulphideType,
+      sulphidePercent: item.sulphidePercent,
+      oxideWeak: item.oxideWeak,
+      oxideMedium: item.oxideMedium,
+      oxideStrong: item.oxideStrong,
+      comments: item.comments,
     }));
 
     // Buat worksheet dan workbook
@@ -153,8 +177,41 @@ const Samples = ({ auth }) => {
     }
   };
 
+  const handleEditSample = (data) => {
+    setOpenModalEdit(true);
+    setIdEdit(data.id);
+  };
+
+  const handleLihatKomentar = (data) => {
+    setModalKomentar(true);
+    setKomentar(data.komentarTolak);
+  }
   return (
     <div className="page">
+      {openModalEdit && (
+        <EditSampleModal
+          setIsOpenModalEdit={setOpenModalEdit}
+          data={idEdit}
+          getLaporan={getSamples}
+        />
+      )}
+
+       {modalKomentar && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-md w-full max-w-md p-6">
+            <h2 className="text-xl font-semibold mb-4">Komentar</h2>
+            <p>{komentar}</p>
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                onClick={() => setModalKomentar(false)}
+                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <h1 className="text-lg font-bold mb-2">RCGC Drill Log Sheet</h1>
       <div className="flex gap-3">
         <button onClick={() => router.back()} className="btn-back">
@@ -198,6 +255,7 @@ const Samples = ({ auth }) => {
               fromTo={fromTo}
               toFrom={toFrom}
               toTo={toTo}
+              namaPembuat={nama}
             />
           )}
           {openModalRange && (
@@ -272,6 +330,7 @@ const Samples = ({ auth }) => {
                             type="number"
                             required
                             className="w-full input"
+                            disabled
                           />
                           <p>To</p>
                           <input
@@ -280,6 +339,7 @@ const Samples = ({ auth }) => {
                             type="number"
                             required
                             className="w-full input"
+                            disabled
                           />
                         </div>
                         <div className="grid grid-cols-5 w-full gap-2 whitespace-nowrap mt-2">
@@ -293,6 +353,7 @@ const Samples = ({ auth }) => {
                             type="number"
                             required
                             className="w-full input"
+                            disabled
                           />
                           <p>To</p>
                           <input
@@ -301,6 +362,7 @@ const Samples = ({ auth }) => {
                             type="number"
                             required
                             className="w-full input"
+                            disabled
                           />
                         </div>
                       </div>
@@ -383,7 +445,28 @@ const Samples = ({ auth }) => {
                   </>
                 )}
               </div>
-              <div className="mt-4 mb-0">
+              <div className="mt-4 mb-0 flex gap-3">
+                {auth.user.role === "geologi junior" ? (
+                  <button
+                    onClick={() => setStatusL("pending")}
+                    className={`${
+                      statusL === "pending" ? "btn-add" : "btn-back"
+                    }`}
+                  >
+                    Laporan Pending
+                  </button>
+                ) : null}
+                {auth.user.role === "geologi junior" ? (
+                  <button
+                    // onClick={() => setIsOpenModalAdd(true)}
+                    onClick={() => setStatusL("ditolak")}
+                    className={`${
+                      statusL === "ditolak" ? "btn-add" : "btn-back"
+                    }`}
+                  >
+                    Laporan Ditolak
+                  </button>
+                ) : null}
                 {auth.user.role === "geologi junior" ? (
                   <button
                     // onClick={() => setIsOpenModalAdd(true)}
@@ -394,6 +477,7 @@ const Samples = ({ auth }) => {
                   </button>
                 ) : null}
               </div>
+
               <div className="overflow-x-auto w-full ">
                 <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-lg">
                   <thead>
@@ -454,7 +538,14 @@ const Samples = ({ auth }) => {
                       >
                         Comments
                       </th>
-                      {auth.user.role === "geologi senior" ? (
+                      <th
+                        rowSpan={3}
+                        className="py-3 px-6 text-center border border-gray-300"
+                      >
+                        Status
+                      </th>
+                      {auth.user.role === "geologi junior" &&
+                      statusL === "ditolak" ? (
                         <th
                           rowSpan={3}
                           className="py-3 px-6 text-center border border-gray-300"
@@ -534,89 +625,110 @@ const Samples = ({ auth }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {samples.map((item, index) => (
-                      <tr key={index} className="border border-gray-300">
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.sampleID}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.from}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.to}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.colour1}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.colour2}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.colour3}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.primary}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.secondary}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.alterationType}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.alterationIntensity}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.quartzType}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.intensity}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.dry ? "✓" : "-"}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.moist ? "✓" : "-"}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.wet ? "✓" : "-"}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.actualKg}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.planKg}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.sulphideType}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.sulphidePercent}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.oxideWeak ? "✓" : "-"}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.oxideMedium ? "✓" : "-"}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.oxideStrong ? "✓" : "-"}
-                        </td>
-                        <td className="py-3 px-6 text-center border border-gray-300">
-                          {item.comments}
-                        </td>
-                        {auth.user.role === "geologi senior" ? (
+                    {samples
+                      .sort((a, b) => a.sampleID.localeCompare(b.sampleID)) // Mengurutkan berdasarkan sampleID
+                      .map((item, index) => (
+                        <tr key={index} className="border border-gray-300">
                           <td className="py-3 px-6 text-center border border-gray-300">
-                            <button
-                              className="btn-hapus"
-                              onClick={() => handleDelete(item.id)}
-                            >
-                              Hapus
-                            </button>
+                            {item.sampleID}
                           </td>
-                        ) : null}
-                      </tr>
-                    ))}
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.from}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.to}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.colour1}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.colour2}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.colour3}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.primary}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.secondary}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.alterationType}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.alterationIntensity}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.quartzType}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.intensity}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.dry ? "✓" : "-"}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.moist ? "✓" : "-"}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.wet ? "✓" : "-"}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.actualKg}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.planKg}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.sulphideType}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.sulphidePercent}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.oxideWeak ? "✓" : "-"}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.oxideMedium ? "✓" : "-"}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.oxideStrong ? "✓" : "-"}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.comments}
+                          </td>
+                          <td className="py-3 px-6 text-center border border-gray-300">
+                            {item.status}
+                          </td>
+                          {statusL === "ditolak" && (
+                            <td className="py-3 flex gap-4 px-6 text-center border border-gray-300">
+                              <button
+                                className="btn-back"
+                                onClick={() => handleLihatKomentar(item)}
+                              >
+                                Lihat Komentar
+                              </button>
+                              <button
+                                className="btn-add"
+                                onClick={() => handleEditSample(item)}
+                              >
+                                Edit
+                              </button>
+                            </td>
+                          )}
+                          {auth.user.role === "geologi senior" ? (
+                            <td className="py-3 px-6 text-center border border-gray-300">
+                              <button
+                                className="btn-hapus"
+                                onClick={() => handleDelete(item.id)}
+                              >
+                                Hapus
+                              </button>
+                            </td>
+                          ) : null}
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>

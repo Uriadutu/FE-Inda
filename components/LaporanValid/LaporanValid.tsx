@@ -2,20 +2,20 @@
 import Config from "@/lib/config";
 import { formatDate } from "@/lib/utils";
 import axios from "axios";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 
-const ValidasiLaporan = (auth) => {
+const LaporanValid = (auth) => {
   const { namalubang } = useParams();
   const [samples, setSamples] = useState([]);
-  const [openModalTolak, setIsOpenModalTolak] = useState(false);
-  const [komentar, setKomentar] = useState("");
-  const [selectedSampleId, setSelectedSampleId] = useState(null);
-
+  console.log(samples, "samples");
+  
   const getSamples = async () => {
     try {
       const response = await axios.get(
-        `${Config.ipPUBLIC}/samples/status/pending/lubang/${namalubang}`
+        `${Config.ipPUBLIC}/samples/terima/${namalubang}`
       );
       const data = response.data;
       setSamples(data);
@@ -28,76 +28,61 @@ const ValidasiLaporan = (auth) => {
     getSamples();
   }, []);
 
-  const handleTerima = async (id) => {
+  const handleExportExcel = async () => {
     try {
-      await axios.patch(`${Config.ipPUBLIC}/terima-samples/${id}`);
-      alert("Laporan Disetujui");
-      getSamples();
-    } catch (error) {}
-  };
+      const response = await axios.get(
+        `${Config.ipPUBLIC}/samples/terima/${namalubang}`
+      );
+      const data = response.data;
 
-  const handleTolak = async () => {
-    try {
-      await axios.patch(`${Config.ipPUBLIC}/samples/${selectedSampleId}`, {
-        status: "Ditolak",
-        komentarTolak: komentar,
-      });
-      alert("Laporan Ditolak");
-      setIsOpenModalTolak(false);
-      setKomentar("");
-      setSelectedSampleId(null);
-      getSamples();
+      const formattedData = data.map((item) => ({
+        HoleId: item?.sumary?.holeId,
+        SampleID: item.sampleID,
+        From: item.from,
+        To: item.to,
+        Colour1: item.colour1,
+        Colour2: item.colour2,
+        Colour3: item.colour3,
+        Primary: item.primary,
+        Secondary: item.secondary,
+        AlterationType: item.alterationType,
+        AlterationIntensity: item.alterationIntensity,
+        QuartzType: item.quartzType,
+        QuartzIntensity: item.intensity,
+        Dry: item.dry ? "Yes" : "No",
+        Moist: item.moist ? "Yes" : "No",
+        Wet: item.wet ? "Yes" : "No",
+        ActualKg: item.actualKg,
+        PlanKg: item.planKg,
+        SulphideType: item.sulphideType,
+        SulphidePercent: item.sulphidePercent,
+        OxideWeak: item.oxideWeak ? "Yes" : "No",
+        OxideMedium: item.oxideMedium ? "Yes" : "No",
+        OxideStrong: item.oxideStrong ? "Yes" : "No",
+        Comments: item.comments,
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(formattedData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Samples");
+
+      XLSX.writeFile(workbook, `Drilling_Sample_${tgl}.xlsx`);
     } catch (error) {
-      console.error("Error rejecting sample:", error);
+      console.error("Failed to export Excel:", error);
     }
-  };
-
-  const handleClickTolak = (id) => {
-    setSelectedSampleId(id);
-    setIsOpenModalTolak(true);
   };
 
   return (
     <div className="page">
-      {openModalTolak && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-md w-full max-w-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Tolak Sample</h2>
-
-            <label
-              htmlFor="komentar"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Komentar
-            </label>
-            <textarea
-              id="komentar"
-              rows="4"
-              value={komentar}
-              onChange={(e) => setKomentar(e.target.value)}
-              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Masukkan komentar penolakan..."
-            />
-
-            <div className="mt-6 flex justify-end gap-2">
-              <button
-                onClick={() => setIsOpenModalTolak(false)}
-                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleTolak}
-                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded"
-              >
-                Tolak
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <h1 className="text-lg font-bold mb-2">Validasi Laporan</h1>
+      <h1 className="text-lg font-bold mb-2">Laporan Valid</h1>
+      <div className="flex gap-3">
+        <Link href={`/laporan-valid/${namalubang}`} className="btn-back">
+          Kembali
+        </Link>
+         {/* <button className="btn-excel" onClick={handleExportExcel}>
+          Export Excel
+        </button> */}
+      </div>
       <div className="">
         <div className="overflow-x-auto w-full ">
           <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-lg">
@@ -105,17 +90,12 @@ const ValidasiLaporan = (auth) => {
               <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
                 <th
                   rowSpan={2}
+                //   colSpan={3}
                   className="py-3 px-6 text-center border border-gray-300"
                 >
-                  Nama Penginput
+                  Hole ID
                 </th>
-                <th
-                  rowSpan={2}
-                  className="py-3 px-6 text-center border border-gray-300"
-                >
-                  Tanggal Penginputan
-                </th>
-                <th colSpan={3}>General Info</th>
+                <th colSpan={3}  className="py-3 px-6 text-center border border-gray-300">General Info</th>
                 <th
                   rowSpan={1}
                   colSpan={3}
@@ -170,18 +150,6 @@ const ValidasiLaporan = (auth) => {
                   className="py-3 px-6 text-center border border-gray-300"
                 >
                   Comments
-                </th>
-                <th
-                  rowSpan={3}
-                  className="py-3 px-6 text-center border border-gray-300"
-                >
-                  Status
-                </th>
-                <th
-                  rowSpan={3}
-                  className="py-3 px-6 text-center border border-gray-300"
-                >
-                  Aksi
                 </th>
               </tr>
               <tr>
@@ -259,11 +227,8 @@ const ValidasiLaporan = (auth) => {
                 .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)) // urutkan dari yang paling lama
                 .map((item, index) => (
                   <tr key={index} className="border border-gray-300">
-                    <td className="py-3 px-6 text-center text-nowrap border border-gray-300">
-                      {item.createdBy}
-                    </td>
-                    <td className="py-3 px-6 text-center text-nowrap border border-gray-300">
-                      {formatDate(item.createdAt)}
+                    <td className="py-3 px-6 text-center border border-gray-300">
+                      {item?.sumary?.holeID}
                     </td>
                     <td className="py-3 px-6 text-center border border-gray-300">
                       {item.sampleID}
@@ -334,25 +299,6 @@ const ValidasiLaporan = (auth) => {
                     <td className="py-3 px-6 text-center border border-gray-300">
                       {item.comments}
                     </td>
-                    <td className="py-3 px-6 text-center border border-gray-300">
-                      {item.status}
-                    </td>
-                    <td className="py-3 px-6 text-center border border-gray-300">
-                      <div className="flex">
-                        <button
-                          className="btn-add"
-                          onClick={() => handleTerima(item.id)}
-                        >
-                          Terima
-                        </button>
-                        <button
-                          className="btn-add"
-                          onClick={() => handleClickTolak(item.id)}
-                        >
-                          Tolak
-                        </button>
-                      </div>
-                    </td>
                   </tr>
                 ))}
             </tbody>
@@ -363,4 +309,4 @@ const ValidasiLaporan = (auth) => {
   );
 };
 
-export default ValidasiLaporan;
+export default LaporanValid;

@@ -1,10 +1,10 @@
 import { auth } from "@/auth";
-import LokasiLubang from "@/components/LokasiLubang";
+import ValidasiLaporan from "@/components/ValidasiLaporan";
 
 const page = async() => {
   const session = await auth();
   return (
-    <LokasiLubang session={session}/>
+    <ValidasiLaporan auth={session}/>
   );
 };
 

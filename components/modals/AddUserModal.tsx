@@ -56,6 +56,7 @@ const AddUserModal = ({
               onChange={(e) => setName(e.target.value)}
               className="w-full border rounded p-2"
               required
+              autoComplete="off"
             />
           </label>
 
@@ -67,6 +68,8 @@ const AddUserModal = ({
               onChange={(e) => setEmail(e.target.value)}
               className="w-full border rounded p-2"
               required
+               autoComplete="off"
+              
             />
           </label>
 
@@ -78,6 +81,7 @@ const AddUserModal = ({
               onChange={(e) => setPassword(e.target.value)}
               className="w-full border rounded p-2"
               required
+               autoComplete="new-password"
             />
           </label>
 

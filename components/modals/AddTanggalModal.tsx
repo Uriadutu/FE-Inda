@@ -6,7 +6,7 @@ import Config from "@/lib/config";
 
 
 const AddTanggalModal = ({ setIsOpenModalAdd, getTanggal }) => {
-    const {shift} = useParams()
+    const {shift, namalubang} = useParams()
   const [tanggal, setTanggal] = useState("");
   const [drillingContractor, setDrillingContractor] = useState("");
   const [rigId, setRigId] = useState("");
@@ -19,6 +19,7 @@ const AddTanggalModal = ({ setIsOpenModalAdd, getTanggal }) => {
         tanggal,
         drillingContractor,
         rigId,
+        lokasilubang : namalubang,
       });
 
       setIsOpenModalAdd(false);

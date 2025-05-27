@@ -32,10 +32,8 @@ const AddSumaryModal = ({ setIsOpenModalAdd, getSumary }) => {
   const [rl, setRl] = useState("");
   const [northingHoleID, setNorthingHoleID] = useState("");
   const [eastingHoleID, setEastingHoleID] = useState("");
-  const {tgl} = useParams();
+  const {tgl, namalubang} = useParams();
 
-  console.log(tgl, "baru");
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,6 +43,7 @@ const AddSumaryModal = ({ setIsOpenModalAdd, getSumary }) => {
         by_tgl : tgl,
         proposedID,
         depth,
+        namalubang,
         from,
         to,
         total_meter: totalMeter,

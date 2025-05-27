@@ -35,7 +35,7 @@ const Navbar = async () => {
                   </li>
                   <li>
                     <Link
-                      href="/shift"
+                      href="/lokasi-lubang"
                       className="hover:text-gray-600 duration-300"
                     >
                       Laporan
@@ -50,6 +50,7 @@ const Navbar = async () => {
                         Arsip Laporan
                       </Link>
                     </li>
+                   
                   {session.user.role === "geologi senior" ? (
                     <li>
                       <Link
@@ -77,6 +78,16 @@ const Navbar = async () => {
                         className="hover:text-gray-600 duration-300"
                       >
                         Data Pengguna
+                      </Link>
+                    </li>
+                  ) : null}
+                  {session.user.role !== "admin" ? (
+                    <li>
+                      <Link
+                        href="/laporan-valid"
+                        className="hover:text-gray-600 duration-300"
+                      >
+                        Laporan Valid
                       </Link>
                     </li>
                   ) : null}

@@ -8,6 +8,7 @@ import html2canvas from "html2canvas";
 import Print from "@/app/cetak/pdf";
 import * as XLSX from 'xlsx';
 import Excel from "@/app/cetak/excel";
+import Link from "next/link";
 
 const Page = () => {
   const router = useRouter();
@@ -78,9 +79,9 @@ const Page = () => {
     <div className="page">
       <h1 className="text-lg font-bold mb-2">Detail</h1>
       <div className="flex gap-3">
-        <button onClick={() => router.back()} className="btn-back">
+        <Link onClick={() => router.back()} className="btn-back">
           Kembali
-        </button>
+        </Link>
         <button onClick={handleSavePDF} className="btn-pdf">
           Ekspor PDF
         </button>

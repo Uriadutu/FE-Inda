@@ -6,17 +6,17 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-const Tanggal = ({ auth }) => {
+const TanggalValid = ({ auth }) => {
   const [dataGet, setDataGet] = useState([]);
   const [openModal, setOpenModal] = useState(false);
 
-  const { shift, namalubang } = useParams();
+  const { namalubang } = useParams();
   
 
   const getTanggal = async () => {
     try {
       const response = await axios.get(
-        `${Config.ipPUBLIC}/tanggal/shift/${shift}/${namalubang}`
+        `${Config.ipPUBLIC}/tanggal/lubang/${namalubang}`
       );
       setDataGet(response.data);
     } catch (error) {
@@ -27,16 +27,7 @@ const Tanggal = ({ auth }) => {
 
   useEffect(() => {
     getTanggal();
-  }, [shift]);
-
-  const hapusData = async (id) => {
-    try {
-      await axios.delete(`${Config.ipPUBLIC}/tanggal/${id}`);
-      getTanggal();
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  });
 
   return (
     <div className="page">
@@ -46,16 +37,11 @@ const Tanggal = ({ auth }) => {
           getTanggal={getTanggal}
         />
       )}
-      <h1 className="text-lg font-bold mb-2">Shift {shift}</h1>
+      <h1 className="text-lg font-bold mb-2">Tanggal</h1>
       <div className="flex gap-3">
-        <Link href={`/lokasi-lubang/${namalubang}/shift`} className=" btn-back">
+        <Link href={`/laporan-valid`} className=" btn-back">
           Kembali
         </Link>
-        {auth.user.role === "geologi junior" ? (
-          <button className="btn-add" onClick={() => setOpenModal(true)}>
-            Tambah Tanggal
-          </button>
-        ) : null}
       </div>
       <table className="w-full border border-black text-left bg-white">
         <thead className="bg-gray-100">
@@ -76,19 +62,12 @@ const Tanggal = ({ auth }) => {
               <td className="border px-4 py-3">{item?.rigId}</td>
               <td className="flex gap-3 py-3 justify-center">
                 <Link
-                  href={`${shift}/${item?.tanggal}`}
+                  href={`/laporan-valid/${namalubang}/${item?.tanggal}`}
                   className="btn-tambah"
                 >
-                  Tambah
+                  Lihat
                 </Link>
-                {auth.user.role === "geologi junior" ? (
-                  <button
-                    className="btn-hapus"
-                    onClick={() => hapusData(item.id)}
-                  >
-                    Hapus
-                  </button>
-                ) : null}
+
               </td>
             </tr>
           ))}
@@ -98,4 +77,4 @@ const Tanggal = ({ auth }) => {
   );
 };
 
-export default Tanggal;
+export default TanggalValid;

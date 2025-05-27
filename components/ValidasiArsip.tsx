@@ -107,8 +107,9 @@ const ValidasiArsip = ({ session }) => {
   const terimaData = async (id) => {
     try {
       await axios.patch(`${Config.ipPUBLIC}/arsip/terima/${id}`);
-      alert("Data Diterima");
       getArsip();
+      window.location.reload()
+      alert("Data Diterima");
     } catch (error) {
       console.error("Error terima data:", error);
     }
